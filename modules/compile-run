@@ -1,0 +1,22 @@
+#!/bin/bash
+
+clang++ -std=c++2a -fmodules-ts --precompile hello.cppm -o outputs/hello.pcm  
+clang++ -std=c++2a -fmodules-ts  -c outputs/hello.pcm -o outputs/hello.pcm.o  
+echo -e "Hi, please choose first or second Module Implementation Unit: \c "
+read  pick
+
+if [ $pick == 'first' ] || [ $pick == '1' ] 
+then
+	echo "You select first implementation"
+	clang++ -std=c++2a -fmodules-ts -c hello.cpp -fmodule-file=outputs/hello.pcm -o outputs/hello.o
+else 
+	echo "You select second implementation"
+	clang++ -std=c++2a -fmodules-ts -c hello2.cpp -fmodule-file=outputs/hello.pcm -o outputs/hello.o
+fi
+
+clang++ -std=c++2a -fmodules-ts --precompile myClass.cppm -o outputs/myClass.pcm  
+clang++ -std=c++2a -fmodules-ts  -c outputs/myClass.pcm -o outputs/myClass.pcm.o  
+clang++ -std=c++2a -fmodules-ts -c myClass.cpp -fmodule-file=outputs/myClass.pcm -o outputs/myClass.o
+clang++ -std=c++2a -fmodules-ts -c main.cpp -fmodule-file=outputs/myClass.pcm -fmodule-file=outputs/hello.pcm -o outputs/main.o  
+clang++  outputs/hello.pcm outputs/main.o outputs/hello.o outputs/myClass.o -o main 
+./main
