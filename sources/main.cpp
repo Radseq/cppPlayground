@@ -1,12 +1,10 @@
-#include <iostream>
-#include <memory>
-#include <vector>
-
+#include "../VectorTets/SomeClassTOVec.hpp"
 #include "../headers/BaseDelivery.hpp"
 #include "../headers/ConstCorrecness.hpp"
 #include "../headers/Delivery.hpp"
 #include "../headers/Lambdas.hpp"
 #include "../headers/NoDiscard.hpp"
+#include "../headers/Raii.hpp"
 #include "../headers/SmartPointer.hpp"
 #include "../headers/StringIiterals.hpp"
 #include "../headers/c20ConstX.hpp"
@@ -15,10 +13,11 @@ void passSP (SP_TestClass* sp) { auto sdsd = sp->GetVal( ); }
 
 void passSP2 (variadicTemplate::Ref<SP_TestClass> sp) { auto sdsd = sp->GetVal( ); }
 
-void smt (Base* const base) { base->add( ); }
+void smt (Base* const base) { base->add (4); }
 
 // declaration, definition is after main function
 void screwWithSmartPointers( );
+void PushBackVSEmplaceBack( );
 
 int main( )
 {
@@ -86,8 +85,11 @@ int main( )
 	// constinit auto localConstinit = 1000; ERROR its not global (namespace) variables, static variables, or static
 	// class members
 
-
 	cc.execute( );
+
+	Raii raii (10);
+
+	PushBackVSEmplaceBack( );
 }
 
 void screwWithSmartPointers( )
@@ -135,4 +137,99 @@ void screwWithSmartPointers( )
 	smt (base);
 
 	auto aaa = deliv.getVal( );
+
+	variadicTemplate::Ref<BaseDelivery> baseSmartPointer = variadicTemplate::CreateRef<Delivery>( );
+	baseSmartPointer->add (3);
+	int res = baseSmartPointer->getVal( );
+}
+
+void PushBackVSEmplaceBack( )
+{
+	std::vector<SomeClassVecTest> vec;
+	SomeClassVecTest              someClassVecTest (1, 2);
+	SomeClassTOVec                someClassTOVec { };
+
+	std::cout << "\n\n\n\n"
+			  << "EMPLACE BACK TEST:" << std::endl;
+
+	vec.emplace_back (std::forward<SomeClassVecTest> (someClassVecTest));  // move constructor
+	std::cout << "std::forward<SomeClassVecTest> = move constructor" << std::endl;
+	vec.emplace_back (std::move (someClassVecTest));  // move constructor + copy constructor
+	std::cout << "std::move (someClassToPushBack) = move + copy contructor" << std::endl;
+	vec.emplace_back (std::forward<int> (10), std::forward<double> (29));  // copy 2x constructor
+	std::cout << "std::forward<int> (10), std::forward<double> (29) = copy constructor x2" << std::endl;
+
+	vec.emplace_back (10, 29);  // move constructor
+	std::cout << "(10, 29) = no print" << std::endl;
+
+	vec.emplace_back (std::forward<SomeClassTOVec> (someClassTOVec));  // 4x copy constructor
+	std::cout << "std::forward<SomeClassTOVec> = 4x copy constructor!" << std::endl;
+
+	vec.emplace_back (std::move (SomeClassTOVec( )));  // no prints
+	std::cout << "std::move (SomeClassTOVec( )) = no prints!" << std::endl;
+	vec.emplace_back (SomeClassTOVec( ));  // no prints
+	std::cout << "SomeClassTOVec( ) = no prints" << std::endl;
+
+	// vec.emplace_back ((std::forward<int> (10), std::forward<double> (29)));  // no prints
+	// std::cout << "(std::forward<int> (10), std::forward<double> (29)) = no prints wtf" << std::endl;
+
+	std::cout << "\n\n\n\n"
+			  << "PUSH BACK TEST:" << std::endl;
+	vec.push_back (std::forward<SomeClassVecTest> (someClassVecTest));  // move constructor
+	std::cout << "std::forward<SomeClassVecTest> = move constructor" << std::endl;
+	vec.push_back (std::move (someClassVecTest));  // 1x move 8x copy
+	std::cout << "std::move (someClassToPushBack) = 1x move 8x copy" << std::endl;
+	vec.push_back ({10, 29});  // move constructor
+	std::cout << "{10, 29} = move constructor" << std::endl;
+
+	vec.push_back (std::forward<SomeClassTOVec> (someClassTOVec));  // move constructor
+	std::cout << "std::forward<SomeClassTOVec> = move constructor" << std::endl;
+
+	vec.push_back (std::move (SomeClassTOVec( )));  //  move constructor
+	std::cout << "std::move (SomeClassTOVec( )) = move constructor" << std::endl;
+	vec.push_back (SomeClassTOVec( ));  // move constructor
+	std::cout << "SomeClassTOVec( ) = move constructor" << std::endl;
+
+	variadicTemplate::forward (vec, someClassVecTest);
+	variadicTemplate::forward (vec, someClassTOVec);
+	variadicTemplate::forward (vec, 2, 3);
+
+	std::cout << "\n\n\n\n"
+			  << "EMPLACE BACK TEST REF MEMBER:" << std::endl;
+
+	SomeClassTOVecRefTest someClassTOVecRefTest;
+
+	vec.emplace_back (std::forward<SomeClassTOVecRefTest> (someClassTOVecRefTest));  // no print
+	std::cout << "std::forward<SomeClassTOVecRefTest> = no print" << std::endl;
+	vec.emplace_back (std::move (someClassTOVecRefTest));  // no print
+	std::cout << "std::move (someClassTOVecRefTest) = no print" << std::endl;
+	vec.emplace_back (std::move (SomeClassTOVecRefTest( )));  // no print
+	std::cout << "std::move (SomeClassTOVecRefTest( )) = no prints!" << std::endl;
+	vec.emplace_back (SomeClassTOVecRefTest( ));  // 16x copy constructor
+	std::cout << "SomeClassTOVecRefTest( ) = 16x copy constructor" << std::endl;
+
+	// vecPushBack.emplace_back (someClassTOVecRefTest);  // we cant do that
+
+	std::cout << "\n\n\n\n"
+			  << "PUSH BACK TEST REF MEMBER:" << std::endl;
+	vec.push_back (std::forward<SomeClassTOVecRefTest> (someClassTOVecRefTest));  // move constructor
+	std::cout << "std::forward<SomeClassTOVecRefTest> = move constructor" << std::endl;
+	vec.push_back (std::move (someClassTOVecRefTest));  // move constructor
+	std::cout << "std::move (someClassTOVecRefTest) = move contructor" << std::endl;
+	vec.push_back (std::move (SomeClassTOVecRefTest( )));  // move constructor
+	std::cout << "std::move (SomeClassTOVecRefTest( )) = move constructor" << std::endl;
+	vec.push_back (SomeClassTOVecRefTest( ));  // move constructor
+	std::cout << "SomeClassTOVecRefTest( ) =  move constructor" << std::endl;
+
+	// variadic template forward
+
+	variadicTemplate::forward (vec, someClassTOVecRefTest);
+	SomeClassTOVec              aToVec { };
+	SomeClassTOVec              bToVec { };
+	SomeClassTOVec              cToVec { };
+	std::vector<SomeClassTOVec> vecSomeClassToVec;
+	vecSomeClassToVec.push_back (aToVec);
+	vecSomeClassToVec.push_back (bToVec);
+	vecSomeClassToVec.push_back (cToVec);
+	variadicTemplate::forward (vec, vecSomeClassToVec);
 }

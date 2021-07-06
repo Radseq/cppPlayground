@@ -9,14 +9,14 @@ void StringIiterals::print( )
 
 	const char* str = "AS\0DFG";  // print AS because \0 mean null it means end of string
 	stdOut (str);
-	std::cout << strlen (str) << std::endl;  // print 2 (because AS)
+	std::cout << std::strlen (str) << std::endl;  // print 2 (because AS)
 
 	// const char str2 [11] = "ASD\0FGHJKZL";  // initializer-string for char array is too long..... because of (\0)
 	// stdOut (str2);
 
 	const char str3 [11] = "ASDF";
 	stdOut (str3);                            // print ASDF
-	std::cout << strlen (str3) << std::endl;  // print 4, no matter that array has 11 elements
+	std::cout << std::strlen (str3) << std::endl;  // print 4, no matter that array has 11 elements
 
 	// to work need add L (L means white characters)
 	const wchar_t* str4 = L"ASDF";  // two bytes per character
@@ -52,7 +52,9 @@ void StringIiterals::print( )
 	// std::string str7 = "Hello" + "World"; dont work
 	std::string str7 = std::string ("Hello") + "World";  // work
 	using namespace std::string_literals;
-	std::string str8 = "Hello"s + "World";  // work, without "using namespace std::string_literals;"" dont work
+	std::string str8 = "Hello"s + " World";  //without "using namespace std::string_literals;"" dont work, also without s dont work
+
+	stdOut (str8);
 
 	const char* str9 = R"(some 1
 	some 2

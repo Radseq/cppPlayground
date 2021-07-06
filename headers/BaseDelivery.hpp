@@ -11,7 +11,7 @@ class BaseDelivery
     int a {0};
 
    public:
-    virtual void       add( )    = 0;
+    virtual void       add (const int&& val)   = 0;
     virtual const int& getVal( ) = 0;
 };
 

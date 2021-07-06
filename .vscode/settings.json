@@ -51,7 +51,8 @@
         "compare": "cpp",
         "concepts": "cpp",
         "cstring": "cpp",
-        "ranges": "cpp"
+        "ranges": "cpp",
+        "list": "cpp"
     },
     "C_Cpp.clang_format_sortIncludes": true,
     //"C_Cpp.loggingLevel": "Debug",

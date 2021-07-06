@@ -4,8 +4,8 @@
 class Base
 {
    public:
-    virtual ~Base( )    = default;
-    virtual void add( ) = 0;
+	virtual ~Base( )                  = default;
+	virtual void add (const int&& val) = 0;
 };
 
 #endif  // BASE_CLASS_HPP

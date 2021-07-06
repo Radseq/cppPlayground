@@ -23,6 +23,11 @@ namespace variadicTemplate
 		return std::make_shared<T> (std::forward<Args> (args)...);
 	}
 
+	template <typename T, typename... Args> void forward (std::vector<T>& vector, Args&&... args)
+	{
+		vector.emplace_back (std::forward<Args> (args)...);
+	}
+
 }  // namespace variadicTemplate
 
 #endif  // #define VARIADIC_TEMPLATE_HPP

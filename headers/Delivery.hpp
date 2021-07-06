@@ -8,7 +8,7 @@ class Delivery : public BaseDelivery
 	int a {0};
 
    public:
-	void       add( ) override;
+	void       add (const int&& val) override;
 	const int& getVal( ) override;
 	void       setVal (const int&& val) { a = val; };
 };
