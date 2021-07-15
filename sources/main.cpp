@@ -8,6 +8,7 @@
 #include "../headers/SmartPointer.hpp"
 #include "../headers/StringIiterals.hpp"
 #include "../headers/c20ConstX.hpp"
+#include "../headers/classthrowOnConstructor.hpp"
 
 void passSP (SP_TestClass* sp) { auto sdsd = sp->GetVal( ); }
 
@@ -18,6 +19,7 @@ void smt (Base* const base) { base->add (4); }
 // declaration, definition is after main function
 void screwWithSmartPointers( );
 void PushBackVSEmplaceBack( );
+void optionalTest( );
 
 int main( )
 {
@@ -90,6 +92,36 @@ int main( )
 	Raii raii (10);
 
 	PushBackVSEmplaceBack( );
+
+	optionalTest( );
+}
+
+void optionalTest( )
+{
+	std::optional<classthrowOnConstructor> optTest;
+
+	if (optTest)
+		int asdsaf; // not entered
+
+	try
+	{
+		optTest.emplace( true );  //throw error on constructor
+		// std::optional is useless when exception is throw in constructor.
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << " e.what() = " << e.what( ) << std::endl;
+	}
+
+	if (optTest) 
+		int fasdada;  // not enter
+
+	optTest.reset();
+	optTest.emplace(false);
+	
+	if (optTest) 
+		int fasdada;  // enter
+
 }
 
 void screwWithSmartPointers( )
@@ -143,11 +175,28 @@ void screwWithSmartPointers( )
 	int res = baseSmartPointer->getVal( );
 }
 
+// https://isocpp.org/blog/2018/02/quick-q-whats-the-difference-between-stdmove-and-stdforward
+void overloaded (int const& arg) { std::cout << "by lvalue\n"; }
+void overloaded (int&& arg) { std::cout << "by rvalue\n"; }
+
+template <typename t>
+/* "t &&" with "t" being template param is special, and  adjusts "t" to be
+   (for example) "int &" or non-ref "int" so std::forward knows what to do. */
+void forwarding (t&& arg)
+{
+	std::cout << "via std::forward: ";
+	overloaded (std::forward<t> (arg));
+	std::cout << "via std::move: ";
+	overloaded (std::move (arg));  // conceptually this would invalidate arg
+	std::cout << "by simple passing: ";
+	overloaded (arg);
+}
+
 void PushBackVSEmplaceBack( )
 {
 	std::vector<SomeClassVecTest> vec;
 	SomeClassVecTest              someClassVecTest (1, 2);
-	SomeClassTOVec                someClassTOVec { };
+	SomeClassTOVec                someClassTOVec {1};
 
 	std::cout << "\n\n\n\n"
 			  << "EMPLACE BACK TEST:" << std::endl;
@@ -165,9 +214,9 @@ void PushBackVSEmplaceBack( )
 	vec.emplace_back (std::forward<SomeClassTOVec> (someClassTOVec));  // 4x copy constructor
 	std::cout << "std::forward<SomeClassTOVec> = 4x copy constructor!" << std::endl;
 
-	vec.emplace_back (std::move (SomeClassTOVec( )));  // no prints
+	vec.emplace_back (std::move (SomeClassTOVec (9)));  // no prints
 	std::cout << "std::move (SomeClassTOVec( )) = no prints!" << std::endl;
-	vec.emplace_back (SomeClassTOVec( ));  // no prints
+	vec.emplace_back (SomeClassTOVec (11));  // no prints
 	std::cout << "SomeClassTOVec( ) = no prints" << std::endl;
 
 	// vec.emplace_back ((std::forward<int> (10), std::forward<double> (29)));  // no prints
@@ -185,9 +234,9 @@ void PushBackVSEmplaceBack( )
 	vec.push_back (std::forward<SomeClassTOVec> (someClassTOVec));  // move constructor
 	std::cout << "std::forward<SomeClassTOVec> = move constructor" << std::endl;
 
-	vec.push_back (std::move (SomeClassTOVec( )));  //  move constructor
+	vec.push_back (std::move (SomeClassTOVec (245)));  //  move constructor
 	std::cout << "std::move (SomeClassTOVec( )) = move constructor" << std::endl;
-	vec.push_back (SomeClassTOVec( ));  // move constructor
+	vec.push_back (SomeClassTOVec (10));  // move constructor
 	std::cout << "SomeClassTOVec( ) = move constructor" << std::endl;
 
 	variadicTemplate::forward (vec, someClassVecTest);
@@ -224,12 +273,28 @@ void PushBackVSEmplaceBack( )
 	// variadic template forward
 
 	variadicTemplate::forward (vec, someClassTOVecRefTest);
-	SomeClassTOVec              aToVec { };
-	SomeClassTOVec              bToVec { };
-	SomeClassTOVec              cToVec { };
+	SomeClassTOVec              aToVec {1};
+	SomeClassTOVec              bToVec {2};
+	SomeClassTOVec              cToVec {3};
 	std::vector<SomeClassTOVec> vecSomeClassToVec;
 	vecSomeClassToVec.push_back (aToVec);
 	vecSomeClassToVec.push_back (bToVec);
 	vecSomeClassToVec.push_back (cToVec);
 	variadicTemplate::forward (vec, vecSomeClassToVec);
+	int a321 = 0;
+
+	std::vector<SomeClassVecTest> vec2;
+	int                           a = sizeof (vec2);
+	SomeClassTOVec                aToVec2 {1};
+	a = sizeof (aToVec2);
+	variadicTemplate::forward (vec2, aToVec2);
+	a             = sizeof (vec2);
+	int saffwqwqe = aToVec2.GetVal( );
+	int sadsadad  = sizeof (SomeClassVecTest);
+
+	std::cout << "initial caller passes rvalue:\n";
+	forwarding (5);
+	std::cout << "initial caller passes lvalue:\n";
+	int x = 5;
+	forwarding (x);
 }

@@ -6,8 +6,15 @@
 
 class SomeClassTOVec
 {
+	int m_int {0};
+
    public:
-	SomeClassTOVec( ) { }
+	SomeClassTOVec (const int& INT)
+		: m_int (INT)
+	{
+	}
+
+	const int GetVal( ) { return m_int; }
 
 	~SomeClassTOVec( ) { };
 };
@@ -25,7 +32,7 @@ class SomeClassVecTest
 	int    m_int {0};
 	double m_double {0};
 	// SomeClassTOVec m_Vec;
-	SomeClassTOVec m_SomeClassToVector;
+	SomeClassTOVec m_SomeClassToVector {0};
 
 	const SomeClassTOVecRefTest& m_SomeClassToVectorRef;
 
@@ -62,12 +69,28 @@ class SomeClassVecTest
 		: m_vecSomeClassTOVec (vecSomeClassToVec)
 		, m_SomeClassToVectorRef (*new SomeClassTOVecRefTest( ))
 	{
+		int a;
 	}
 
 	SomeClassVecTest (const std::vector<SomeClassTOVec>&& vecSomeClassToVec)
-		: m_vecSomeClassTOVec (std::move(vecSomeClassToVec))
+		: m_vecSomeClassTOVec (std::move (vecSomeClassToVec))
 		, m_SomeClassToVectorRef (*new SomeClassTOVecRefTest( ))
 	{
+		int a;
+	}
+
+	SomeClassVecTest ( std::vector<SomeClassTOVec>& vecSomeClassToVec)
+		: m_vecSomeClassTOVec (vecSomeClassToVec)
+		, m_SomeClassToVectorRef (*new SomeClassTOVecRefTest( ))
+	{
+		int a;
+	}
+
+	SomeClassVecTest ( std::vector<SomeClassTOVec>&& vecSomeClassToVec)
+		: m_vecSomeClassTOVec (std::move (vecSomeClassToVec))
+		, m_SomeClassToVectorRef (*new SomeClassTOVecRefTest( ))
+	{
+		int a;
 	}
 
 	SomeClassVecTest (const SomeClassVecTest&)

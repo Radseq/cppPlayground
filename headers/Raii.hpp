@@ -7,17 +7,32 @@ class Raii
 	int* m_SomeVal;
 
    public:
-	explicit Raii (const int& Val);
-	~Raii( );
+	explicit Raii (const int& Val) noexcept;
+	~Raii( ) noexcept;
+
+	// copy constructor
+	Raii (const Raii& other) = delete;
+	// copy assignment
+	Raii& operator= (const Raii& other) = delete;
+
+	// move constructor
+	Raii (Raii&& other) noexcept
+	{
+		// to test
+		*m_SomeVal = *other.m_SomeVal;
+	}
+
+	// move assignment
+	Raii& operator= (Raii&& other) noexcept
+	{
+		// to test
+		if (this != &other) { *m_SomeVal = *other.m_SomeVal; }
+		return (*this);
+	}
 };
 
-Raii::Raii (const int& Val)
-{
-	m_SomeVal = new int (Val);
-}
+Raii::Raii (const int& Val) noexcept { m_SomeVal = new int (Val); }
 
-Raii::~Raii( ) { 
-    delete m_SomeVal; 
-}
+Raii::~Raii( ) noexcept { delete m_SomeVal; }
 
 #endif  // RAII_H
