@@ -89,39 +89,48 @@ int main( )
 
 	cc.execute( );
 
-	Raii raii (10);
-
 	PushBackVSEmplaceBack( );
 
 	optionalTest( );
+
+	Raii raii (10);
+	Raii raii2 (x);
+	Raii raii3 (std::move (raii2));  // run move constructor
+
+	Raii raii4 = std::move (raii);  // also run move constructor, we construct object not assignment it
+
+	Raii raii5 = std::move (Raii (30));  // also run move constructor, we construct object not assignment it
+
+	Raii raii6 (60);
+
+	raii =
+		std::move (raii5);  // call move assignment, without std::move it will call copy, but we delete copy assignment
+
+	return 1;
 }
 
 void optionalTest( )
 {
 	std::optional<classthrowOnConstructor> optTest;
 
-	if (optTest)
-		int asdsaf; // not entered
+	if (optTest) int asdsaf;  // not entered
 
 	try
 	{
-		optTest.emplace( true );  //throw error on constructor
-		// std::optional is useless when exception is throw in constructor.
+		optTest.emplace (true);  // throw error on constructor
+								 // std::optional is useless when exception is throw in constructor.
 	}
 	catch (const std::exception& e)
 	{
 		std::cout << " e.what() = " << e.what( ) << std::endl;
 	}
 
-	if (optTest) 
-		int fasdada;  // not enter
+	if (optTest) int fasdada;  // not enter
 
-	optTest.reset();
-	optTest.emplace(false);
-	
-	if (optTest) 
-		int fasdada;  // enter
+	optTest.reset( );
+	optTest.emplace (false);
 
+	if (optTest) int fasdada;  // enter
 }
 
 void screwWithSmartPointers( )

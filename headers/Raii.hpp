@@ -7,7 +7,7 @@ class Raii
 	int* m_SomeVal;
 
    public:
-	explicit Raii (const int& Val) noexcept;
+	explicit Raii (const int& Val) noexcept; // explicit to no allow do smt. like Raii raiiObj = 10;
 	~Raii( ) noexcept;
 
 	// copy constructor
@@ -18,15 +18,28 @@ class Raii
 	// move constructor
 	Raii (Raii&& other) noexcept
 	{
-		// to test
-		*m_SomeVal = *other.m_SomeVal;
+		std::cout << "move constructor"
+				  << "\n";
+		if (this != &other && other.m_SomeVal != nullptr)
+		{
+			m_SomeVal       = other.m_SomeVal;
+			other.m_SomeVal = nullptr;
+		}
 	}
 
 	// move assignment
 	Raii& operator= (Raii&& other) noexcept
 	{
-		// to test
-		if (this != &other) { *m_SomeVal = *other.m_SomeVal; }
+		std::cout << "move assignment"
+				  << "\n";
+		if (this != &other && other.m_SomeVal != nullptr)
+		{
+			delete m_SomeVal;  // prevent memory leak
+			// rest below is same as move operator
+			m_SomeVal       = other.m_SomeVal;
+			other.m_SomeVal = nullptr;
+		}
+
 		return (*this);
 	}
 };
